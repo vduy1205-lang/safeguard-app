@@ -1,0 +1,35 @@
+{
+  "vapidKeys": {
+    "publicKey": "BDZNEVyujUTNQzb1yVYfDkCMeXtPunYY4i24QCMHFLBLP_PRw4X8iRdw2M8SkRPpjNvEF1xfPzl4HtigW1B8iEU",
+    "privateKey": "zrkNTEY9M0EI1SgReOiogO7DiTTCE3vQ66Vuvxkx14E"
+  },
+  "tokenSecret": "ab55673b04823925d95e34bb2e3847bd47297ba77c516123deac1c8dcc4f7ea9",
+  "users": [
+    {
+      "username": "nguoithan",
+      "password": "123456",
+      "role": "user",
+      "fullName": "Người Thân (Caregiver)"
+    },
+    {
+      "username": "admin",
+      "password": "admin123",
+      "role": "admin",
+      "fullName": "Quản Trị Viên (Admin)"
+    }
+  ],
+  "config": {
+    "emergencyPhone": "0923834966",
+    "aiThreshold": 0.7
+  },
+  "subscriptions": [
+    {
+      "endpoint": "https://web.push.apple.com/QNndUC2KRhmTnorPGHlkL7Z6l46DCmmivq1hNp8qR8J0W7beX5IhYcpZGq-EODlOFksj1DFISJqrNNqMKO1fZQtH_YqwiFt8mg7YKFJutRXRV46fNYf9sSs3vAp-p4Ce7SYUEsvunpn3gn1SmnrwX430Tl6ZICe4-_n4ODOTK20",
+      "keys": {
+        "p256dh": "BBgpXqJRRmn0m01RE7Kj0IcUnjc7GaegJFVRIhOPHS1rwPM95ynl_DP8OyN_sgb5uRiIkPJfyYU7GFkIpgLzYeQ",
+        "auth": "p26rInRqRdff_2t-Tm94Og"
+      }
+    }
+  ],
+  "history": []
+}

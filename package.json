@@ -1,0 +1,14 @@
+{
+  "name": "safeguard-iot-app",
+  "version": "2.0.0",
+  "description": "SafeGuard Backend & iOS PWA Frontend (RBAC, 24h Session, Background Web Push, Network-Aware Monitoring)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "web-push": "^3.6.7"
+  }
+}

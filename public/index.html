@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SafeGuard</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SafeGuard">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#070a12">
+  <link rel="apple-touch-icon" href="/icon.svg">
+
+  <style>
+    :root {
+      --bg: #070a12;
+      --card-bg: rgba(18, 24, 38, 0.78);
+      --card-border: rgba(255, 255, 255, 0.09);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #f43f5e;
+      --accent: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.08) 0, transparent 45%);
+      color: var(--text-main);
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: calc(env(safe-area-inset-top, 16px) + 6px) 16px calc(env(safe-area-inset-bottom, 20px) + 8px);
+      overflow-x: hidden;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ─── BANNER NỔI TRONG APP ─── */
+    .ios-notification {
+      position: fixed;
+      top: -140px;
+      left: 14px;
+      right: 14px;
+      background: rgba(24, 10, 16, 0.96);
+      border: 1px solid rgba(244, 63, 94, 0.55);
+      border-radius: 22px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 12px 32px rgba(244, 63, 94, 0.4);
+      z-index: 9999;
+      transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ios-notification.active {
+      top: calc(env(safe-area-inset-top, 12px) + 8px);
+    }
+    .notif-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #f43f5e, #be123c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      animation: pulseAlert 0.9s infinite alternate;
+    }
+    @keyframes pulseAlert {
+      from { transform: scale(1); }
+      to { transform: scale(1.08); }
+    }
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+    }
+    .notif-desc {
+      font-size: 0.78rem;
+      color: #fecdd3;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+
+    /* ─── MÀN HÌNH ĐĂNG NHẬP ─── */
+    .login-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      max-width: 400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 26px;
+      padding: 28px 22px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .login-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+    }
+    .login-title {
+      text-align: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .login-sub {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-bottom: 22px;
+      line-height: 1.4;
+    }
+    .alert-box {
+      background: rgba(244, 63, 94, 0.14);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+    .form-group { margin-bottom: 14px; }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(9, 13, 22, 0.8);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      user-select: text;
+    }
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 15px;
+      border: none;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .quick-accounts {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-border);
+      display: flex;
+      gap: 8px;
+    }
+    .chip-btn {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-sub);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ─── HEADER & THANH TÀI KHOẢN ─── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 2px 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+    .brand-text p {
+      font-size: 0.68rem;
+      color: var(--text-sub);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .status-badge.online {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--green);
+    }
+    .status-badge.offline {
+      background: rgba(244, 63, 94, 0.16);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: var(--red);
+      animation: pulseAlert 1s infinite alternate;
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .session-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      font-size: 0.73rem;
+    }
+    .role-tag {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .session-timer {
+      color: var(--text-sub);
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 0.7rem;
+    }
+    .logout-btn {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fda4af;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ─── THANH KÍCH HOẠT WEB PUSH CHẠY NỀN ─── */
+    .push-bar {
+      background: rgba(56, 189, 248, 0.09);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 16px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .push-info {
+      font-size: 0.74rem;
+      color: #bae6fd;
+      line-height: 1.35;
+      flex: 1;
+    }
+    .push-btn {
+      background: var(--accent);
+      color: #070a12;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* ─── CARD TRẠNG THÁI TRUNG TÂM ─── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 20px 18px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      margin-bottom: 12px;
+    }
+    .status-card {
+      text-align: center;
+      padding: 28px 18px 24px;
+    }
+    .status-sub-lbl {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .status-visual {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 14px;
+      border-radius: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      transition: all 0.35s ease;
+    }
+    .status-card.state-idle .status-visual {
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+    .status-card.state-walk .status-visual {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-card.state-fall .status-visual {
+      background: rgba(244, 63, 94, 0.2);
+      border: 1px solid rgba(244, 63, 94, 0.55);
+      animation: pulseAlert 0.75s infinite alternate;
+    }
+    .status-card.state-offline .status-visual {
+      background: rgba(148, 163, 184, 0.12);
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      filter: grayscale(0.4);
+    }
+
+    .main-status-text {
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .state-idle .main-status-text { color: var(--accent); }
+    .state-walk .main-status-text { color: var(--green); }
+    .state-fall .main-status-text { color: var(--red); }
+    .state-offline .main-status-text { color: #cbd5e1; font-size: 1.15rem; }
+
+    .update-time {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      line-height: 1.45;
+    }
+    .offline-note {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+      font-size: 0.74rem;
+      line-height: 1.4;
+    }
+    .state-offline .offline-note { display: block; }
+
+    .reset-btn {
+      display: none;
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f43f5e, #be123c);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(244, 63, 94, 0.35);
+    }
+    .state-fall .reset-btn { display: block; }
+
+    /* ─── 3 Ô ĐO TELEMETRY ─── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .metric-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 14px 8px;
+      text-align: center;
+    }
+    .metric-val {
+      font-size: 1.18rem;
+      font-weight: 800;
+      font-family: "SF Mono", Menlo, monospace;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .metric-lbl {
+      font-size: 0.65rem;
+      color: var(--text-sub);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* ─── PANEL QUẢN TRỊ ADMIN ─── */
+    .section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+    }
+    .admin-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .footer {
+      margin-top: auto;
+      text-align: center;
+      padding-top: 10px;
+      font-size: 0.68rem;
+      color: #475569;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BANNER NỔI TRONG APP KHI CÓ TÉ NGÃ -->
+  <div class="ios-notification" id="iosAlert">
+    <div class="notif-icon">🚨</div>
+    <div class="notif-body">
+      <div class="notif-title">
+        <span>CẢNH BÁO TÉ NGÃ KHẨN CẤP!</span>
+        <span style="font-size:0.7rem;color:#fda4af;">Ngay bây giờ</span>
+      </div>
+      <div class="notif-desc">Phát hiện người thân đeo đai bị té ngã và đang nằm bất động!</div>
+    </div>
+  </div>
+
+  <!-- ================= MÀN HÌNH 1: ĐĂNG NHẬP (AUTH & 24H SESSION) ================= -->
+  <div class="login-wrapper" id="loginScreen">
+    <div class="login-card">
+      <div class="login-logo">🛡️</div>
+      <div class="login-title">SafeGuard IoT</div>
+      <div class="login-sub">Hệ Thống Giám Sát Vận Động & Cảnh Báo Té Ngã<br>(Duy trì phiên 24 giờ • Báo động ngầm 24/7)</div>
+
+      <div class="alert-box hidden" id="loginAlert"></div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Tên tài khoản</label>
+          <input type="text" id="inpUser" class="form-input" placeholder="Nhập tài khoản..." autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mật khẩu bảo vệ</label>
+          <input type="password" id="inpPass" class="form-input" placeholder="Nhập mật khẩu..." autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn-primary">ĐĂNG NHẬP HỆ THỐNG</button>
+      </form>
+
+      <div class="quick-accounts">
+        <button type="button" class="chip-btn" onclick="fillAccount('nguoithan','123456')">👤 Điền: Người thân</button>
+        <button type="button" class="chip-btn" onclick="fillAccount('admin','admin123')">⚙️ Điền: Quản trị Admin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MÀN HÌNH 2: GIÁM SÁT CHÍNH (DASHBOARD) ================= -->
+  <div id="dashboardScreen" class="hidden">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SafeGuard</h1>
+          <p>Giám Sát Vận Động Đai Lưng</p>
+        </div>
+      </div>
+      <div class="status-badge offline" id="netBadge">
+        <div class="badge-dot"></div>
+        <span id="netBadgeText">Đang kiểm tra...</span>
+      </div>
+    </header>
+
+    <!-- THANH PHIÊN 24 GIỜ & NÚT ĐĂNG XUẤT -->
+    <div class="session-bar">
+      <div>
+        <span class="role-tag" id="userRoleLabel">Người thân</span>
+        <span class="session-timer" id="sessionCountdown">• Còn 24:00:00</span>
+      </div>
+      <button class="logout-btn" onclick="handleExplicitLogout()">Đăng xuất</button>
+    </div>
+
+    <!-- THANH ĐĂNG KÝ NHẬN THÔNG BÁO ĐẨY CHẠY NỀN (iOS 18.6 WEB PUSH) -->
+    <div class="push-bar" id="pushBar">
+      <div class="push-info" id="pushStatusText">
+        🔔 Bật thông báo đẩy để nhận cảnh báo té ngã ngay cả khi thoát app chơi game / lướt Facebook.
+      </div>
+      <button class="push-btn" id="btnEnablePush" onclick="enableBackgroundPush()">Bật Thông Báo</button>
+      <button class="push-btn hidden" id="btnTestPush" onclick="testBackgroundPush()">Test Ngầm 5s</button>
+    </div>
+
+    <main>
+      <section class="card status-card state-offline" id="mainStatusCard">
+        <div class="status-sub-lbl">Trạng thái người đeo đai</div>
+        <div class="status-visual" id="stateVisual">📡</div>
+        <div class="main-status-text" id="stateText">Người đeo đai đang ở vùng không có Internet</div>
+        <div class="update-time" id="lastSeen">Mất kết nối • Chưa có dữ liệu</div>
+
+        <div class="offline-note">
+          ⚠️ <b>Chế độ dự phòng GSM đã bật:</b> Nếu xảy ra té ngã tại vùng không có Internet, module <b>SIM A7680C</b> trên đai sẽ tự động gửi tin nhắn SMS khẩn cấp về số điện thoại người thân.
+        </div>
+
+        <button class="reset-btn" onclick="confirmSafe()">
+          ✓ XÁC NHẬN AN TOÀN / ĐÃ HỖ TRỢ
+        </button>
+      </section>
+
+      <!-- 3 Ô ĐO TELEMETRY -->
+      <section class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-val" id="valAcc">9.80</div>
+          <div class="metric-lbl">Gia tốc (m/s²)</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val" id="valStd">0.00</div>
+          <div class="metric-lbl">Độ lệch σ</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-val" id="valAI">0%</div>
+          <div class="metric-lbl">AI TinyML</div>
+        </div>
+      </section>
+
+      <!-- BẢNG QUẢN TRỊ DÀNH RIÊNG CHO ADMIN (RBAC) -->
+      <section class="card hidden" id="adminPanel">
+        <div class="section-title">⚙️ Cấu Hình Quản Trị Viên (Admin RBAC)</div>
+        <div class="admin-row">
+          <div>
+            <label class="form-label">SĐT nhận SMS (SIM A7680C)</label>
+            <input type="tel" id="cfgPhone" class="form-input" value="0923834966">
+          </div>
+          <div>
+            <label class="form-label">Ngưỡng AI TinyML (%)</label>
+            <input type="number" id="cfgAi" class="form-input" min="30" max="99" value="70">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="saveAdminConfig()">LƯU CẤU HÌNH XUỐNG ĐAI LƯNG</button>
+      </section>
+    </main>
+  </div>
+
+  <footer class="footer">
+    Đồ Án Chuyên Ngành Điện Tử Viễn Thông • ĐH Tôn Đức Thắng<br>
+    SafeGuard PWA v2.0 (Tương thích iOS 18.6 Standalone)
+  </footer>
+
+  <script>
+    const SESSION_STORAGE_KEY = 'safeguard_auth_session';
+    let pollTimer = null;
+    let countdownTimer = null;
+    let swRegistration = null;
+
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+    }
+
+    function fillAccount(u, p) {
+      document.getElementById('inpUser').value = u;
+      document.getElementById('inpPass').value = p;
+    }
+
+    function showLoginAlert(msg) {
+      const box = document.getElementById('loginAlert');
+      if (!msg) {
+        box.classList.add('hidden');
+        return;
+      }
+      box.textContent = msg;
+      box.classList.remove('hidden');
+    }
+
+    function getValidSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        if (!session.token || !session.expiresAt) return null;
+
+        // Kiểm tra hạn 24 giờ (ví dụ đăng nhập 00:00 ngày 01/01 -> hết hạn 00:00 ngày 02/01)
+        if (Date.now() >= session.expiresAt) {
+          // Chỉ xóa phiên đăng nhập, KHÔNG hủy PushSubscription để vẫn nhận thông báo té ngã sau 24h
+          localStorage.removeItem(SESSION_STORAGE_KEY);
+          showLoginAlert('Phiên đăng nhập 24 giờ đã hết hạn. Vui lòng đăng nhập lại để xem dữ liệu.');
+          return null;
+        }
+        return session;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      showLoginAlert('');
+      const username = document.getElementById('inpUser').value.trim();
+      const password = document.getElementById('inpPass').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showLoginAlert(data.error || 'Đăng nhập thất bại');
+          return;
+        }
+
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data));
+        enterDashboard(data);
+      } catch (err) {
+        showLoginAlert('Không thể kết nối tới máy chủ SafeGuard.');
+      }
+    }
+
+    // Khi người dùng chủ động bấm "Đăng xuất" (trường hợp mượn máy người khác):
+    // Xóa cả phiên 24h VÀ hủy đăng ký thông báo đẩy trên thiết bị này
+    async function handleExplicitLogout() {
+      try {
+        if (swRegistration && swRegistration.pushManager) {
+          const sub = await swRegistration.pushManager.getSubscription();
+          if (sub) {
+            await fetch('/api/push/unsubscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: sub.endpoint })
+            });
+            await sub.unsubscribe();
+          }
+        }
+      } catch (e) {}
+
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+      stopTimers();
+      document.getElementById('iosAlert').classList.remove('active');
+      document.getElementById('dashboardScreen').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      showLoginAlert('Đã đăng xuất và tắt nhận thông báo khẩn cấp trên thiết bị này.');
+    }
+
+    function stopTimers() {
+      if (pollTimer) clearInterval(pollTimer);
+      if (countdownTimer) clearInterval(countdownTimer);
+    }
+
+    function updateSessionCountdown() {
+      const session = getValidSession();
+      if (!session) {
+        stopTimers();
+        document.getElementById('dashboardScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+        return;
+      }
+      const remainMs = Math.max(0, session.expiresAt - Date.now());
+      const hrs = String(Math.floor(remainMs / 3600000)).padStart(2, '0');
+      const mins = String(Math.floor((remainMs % 3600000) / 60000)).padStart(2, '0');
+      const secs = String(Math.floor((remainMs % 60000) / 1000)).padStart(2, '0');
+      document.getElementById('sessionCountdown').textContent = `• Hạn 24h: còn ${hrs}:${mins}:${secs}`;
+    }
+
+    async function checkExistingPushSubscription() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        document.getElementById('pushStatusText').textContent =
+          '📲 Để nhận thông báo ngầm trên iOS 18.6: Bấm Chia sẻ (↑) ở Safari → Thêm vào MH chính rồi mở từ icon.';
+        document.getElementById('btnEnablePush').classList.add('hidden');
+        return;
+      }
+      try {
+        swRegistration = await navigator.serviceWorker.register('/sw.js');
+        const sub = await swRegistration.pushManager.getSubscription();
+        if (sub && Notification.permission === 'granted') {
+          await syncSubscriptionToServer(sub);
+          setPushActivatedUI();
+        }
+      } catch (e) {}
+    }
+
+    function setPushActivatedUI() {
+      document.getElementById('pushStatusText').innerHTML =
+        '✅ <b>Đã bật Báo động chạy nền 24/7:</b> Luôn nhận thông báo té ngã kể cả khi thoát app chơi game/lướt FB hoặc quá 24h.';
+      document.getElementById('btnEnablePush').classList.add('hidden');
+      document.getElementById('btnTestPush').classList.remove('hidden');
+    }
+
+    async function syncSubscriptionToServer(sub) {
+      const session = getValidSession();
+      if (!session) return;
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.token
+        },
+        body: JSON.stringify({ subscription: sub })
+      });
+    }
+
+    async function enableBackgroundPush() {
+      try {
+        if (!('Notification' in window) || !('PushManager' in window)) {
+          alert('Vui lòng thêm ứng dụng vào Màn hình chính (Add to Home Screen) trên iOS 18.6 để bật thông báo chạy nền!');
+          return;
+        }
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert('Bạn cần chọn "Cho phép" (Allow) để nhận thông báo khi có té ngã!');
+          return;
+        }
+        swRegistration = await navigator.serviceWorker.ready;
+        const keyRes = await fetch('/api/push/vapid-public-key');
+        const { publicKey } = await keyRes.json();
+
+        let sub = await swRegistration.pushManager.getSubscription();
+        if (!sub) {
+          sub = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicKey)
+          });
+        }
+        await syncSubscriptionToServer(sub);
+        setPushActivatedUI();
+      } catch (err) {
+        alert('Lưu ý: Trên iPhone (iOS 18.6), cần truy cập qua link HTTPS và mở từ icon ngoài Màn hình chính để bật Web Push.');
+      }
+    }
+
+    async function testBackgroundPush() {
+      const session = getValidSession();
+      if (!session) return;
+      const btn = document.getElementById('btnTestPush');
+      btn.textContent = 'Đang đếm 5s...';
+      await fetch('/api/push/test', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.token
+        },
+        body: JSON.stringify({ delayMs: 5000 })
+      });
+      setTimeout(() => { btn.textContent = 'Test Ngầm 5s'; }, 5500);
+    }
+
+    function enterDashboard(session) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('dashboardScreen').classList.remove('hidden');
+      document.getElementById('userRoleLabel').textContent =
+        session.user.role === 'admin' ? '👑 Quản trị viên (Admin)' : '👤 Người thân (Caregiver)';
+
+      if (session.user.role === 'admin') {
+        document.getElementById('adminPanel').classList.remove('hidden');
+      } else {
+        document.getElementById('adminPanel').classList.add('hidden');
+      }
+
+      checkExistingPushSubscription();
+      updateSessionCountdown();
+      stopTimers();
+      countdownTimer = setInterval(updateSessionCountdown, 1000);
+      pollStatus();
+      pollTimer = setInterval(pollStatus, 600);
+    }
+
+    async function pollStatus() {
+      const session = getValidSession();
+      if (!session) return;
+
+      try {
+        const res = await fetch('/api/status?t=' + Date.now(), {
+          headers: { 'Authorization': 'Bearer ' + session.token }
+        });
+        if (res.status === 401) {
+          localStorage.removeItem(SESSION_STORAGE_KEY);
+          updateSessionCountdown();
+          return;
+        }
+        const d = await res.json();
+
+        const netBadge = document.getElementById('netBadge');
+        const netBadgeText = document.getElementById('netBadgeText');
+        const card = document.getElementById('mainStatusCard');
+        const visual = document.getElementById('stateVisual');
+        const txt = document.getElementById('stateText');
+        const seen = document.getElementById('lastSeen');
+        const notif = document.getElementById('iosAlert');
+
+        document.getElementById('valAcc').textContent = Number(d.acc || 9.8).toFixed(2);
+        document.getElementById('valStd').textContent = Number(d.std || 0).toFixed(2);
+        document.getElementById('valAI').textContent = Math.round((d.ai || 0) * 100) + '%';
+
+        if (d.config && document.activeElement !== document.getElementById('cfgPhone') && document.activeElement !== document.getElementById('cfgAi')) {
+          document.getElementById('cfgPhone').value = d.config.emergencyPhone;
+          document.getElementById('cfgAi').value = Math.round(d.config.aiThreshold * 100);
+        }
+
+        if (!d.online) {
+          netBadge.className = 'status-badge offline';
+          netBadgeText.textContent = 'Vùng không có Internet';
+          card.className = 'card status-card state-offline';
+          visual.textContent = '⚠️';
+          txt.textContent = 'Người đeo đai đang ở vùng không có Internet';
+          seen.textContent = 'Mất kết nối lúc: ' + (d.lastSeen || 'Chưa kết nối');
+          notif.classList.remove('active');
+          return;
+        }
+
+        netBadge.className = 'status-badge online';
+        netBadgeText.textContent = 'Trực tuyến (Online)';
+
+        if (d.is_fallen) {
+          card.className = 'card status-card state-fall';
+          visual.textContent = '🚨';
+          txt.textContent = 'TÉ NGÃ NGUY HIỂM';
+          notif.classList.add('active');
+        } else {
+          notif.classList.remove('active');
+          if (d.status === 'DANG DI BO') {
+            card.className = 'card status-card state-walk';
+            visual.textContent = '🚶';
+            txt.textContent = 'ĐANG ĐI BỘ';
+          } else {
+            card.className = 'card status-card state-idle';
+            visual.textContent = '🧍';
+            txt.textContent = 'ĐỨNG / NGỒI YÊN';
+          }
+        }
+        seen.textContent = 'Cập nhật trực tiếp: ' + d.lastSeen;
+      } catch (e) {}
+    }
+
+    async function confirmSafe() {
+      const session = getValidSession();
+      if (!session) return;
+      await fetch('/api/reset', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + session.token }
+      });
+      document.getElementById('iosAlert').classList.remove('active');
+      pollStatus();
+    }
+
+    async function saveAdminConfig() {
+      const session = getValidSession();
+      if (!session) return;
+      const emergencyPhone = document.getElementById('cfgPhone').value.trim();
+      const aiThreshold = Number(document.getElementById('cfgAi').value) / 100;
+      const res = await fetch('/api/admin/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + session.token
+        },
+        body: JSON.stringify({ emergencyPhone, aiThreshold })
+      });
+      if (res.ok) {
+        alert('Đã lưu cấu hình SĐT và ngưỡng AI thành công!');
+      }
+    }
+
+    // Kiểm tra lại thời hạn 24h mỗi khi người dùng mở lại app từ đa nhiệm hoặc bấm vào từ thông báo nổi
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        const session = getValidSession();
+        if (session) {
+          pollStatus();
+        } else {
+          stopTimers();
+          document.getElementById('dashboardScreen').classList.add('hidden');
+          document.getElementById('loginScreen').classList.remove('hidden');
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      }
+      const session = getValidSession();
+      if (session) {
+        enterDashboard(session);
+      }
+    });
+  </script>
+</body>
+</html>

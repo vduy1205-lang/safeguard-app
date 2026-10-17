@@ -1,0 +1,19 @@
+{
+  "name": "SafeGuard - Giám Sát Té Ngã AI",
+  "short_name": "SafeGuard",
+  "description": "Hệ thống Giám sát Vận động & Cảnh báo Té ngã cho Người cao tuổi",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070a12",
+  "theme_color": "#070a12",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
