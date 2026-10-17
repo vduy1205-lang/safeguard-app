@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 giờ
-const OFFLINE_TIMEOUT_MS = 6000;
+const OFFLINE_TIMEOUT_MS = 20000;
 
 app.use(cors());
 app.use(express.json());
