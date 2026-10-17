@@ -7,24 +7,23 @@
 
   <link rel="manifest" href="/manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="SafeGuard">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#070a12">
-  <link rel="apple-touch-icon" href="/icon.svg">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/apple-touch-icon.png">
 
   <style>
     :root {
-      --bg: #070a12;
-      --card-bg: rgba(18, 24, 38, 0.78);
-      --card-border: rgba(255, 255, 255, 0.09);
-      --text-main: #f8fafc;
-      --text-sub: #94a3b8;
-      --cyan: #06b6d4;
-      --green: #10b981;
-      --amber: #f59e0b;
-      --red: #f43f5e;
-      --accent: #38bdf8;
+      --bg: #ffffff;
+      --card-bg: #f8fafc;
+      --card-border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --blue: #0284c7;
+      --green: #059669;
+      --red: #dc2626;
     }
 
     * {
@@ -38,36 +37,31 @@
 
     body {
       background-color: var(--bg);
-      background-image:
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0, transparent 45%),
-        radial-gradient(at 100% 100%, rgba(244, 63, 94, 0.08) 0, transparent 45%);
       color: var(--text-main);
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      padding: calc(env(safe-area-inset-top, 16px) + 6px) 16px calc(env(safe-area-inset-bottom, 20px) + 8px);
+      padding: calc(env(safe-area-inset-top, 16px) + 8px) 16px calc(env(safe-area-inset-bottom, 20px) + 12px);
       overflow-x: hidden;
     }
 
     .hidden { display: none !important; }
 
-    /* ─── BANNER NỔI TRONG APP ─── */
+    /* ─── BANNER NỔI KHI CÓ TÉ NGÃ ─── */
     .ios-notification {
       position: fixed;
-      top: -140px;
+      top: -150px;
       left: 14px;
       right: 14px;
-      background: rgba(24, 10, 16, 0.96);
-      border: 1px solid rgba(244, 63, 94, 0.55);
-      border-radius: 22px;
+      background: #ffffff;
+      border: 2px solid var(--red);
+      border-radius: 20px;
       padding: 14px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 12px 32px rgba(244, 63, 94, 0.4);
+      box-shadow: 0 12px 30px rgba(220, 38, 38, 0.25);
       z-index: 9999;
       transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -77,8 +71,9 @@
     .notif-icon {
       width: 42px;
       height: 42px;
-      border-radius: 13px;
-      background: linear-gradient(135deg, #f43f5e, #be123c);
+      border-radius: 12px;
+      background: var(--red);
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -88,24 +83,25 @@
     }
     @keyframes pulseAlert {
       from { transform: scale(1); }
-      to { transform: scale(1.08); }
+      to { transform: scale(1.06); }
     }
     .notif-body { flex: 1; min-width: 0; }
     .notif-title {
       font-size: 0.9rem;
-      font-weight: 700;
-      color: #fff;
+      font-weight: 800;
+      color: var(--red);
       display: flex;
       justify-content: space-between;
     }
     .notif-desc {
-      font-size: 0.78rem;
-      color: #fecdd3;
+      font-size: 0.8rem;
+      color: var(--text-main);
       margin-top: 3px;
-      line-height: 1.3;
+      line-height: 1.35;
+      font-weight: 500;
     }
 
-    /* ─── MÀN HÌNH ĐĂNG NHẬP ─── */
+    /* ─── MÀN HÌNH 1: ĐĂNG NHẬP ─── */
     .login-wrapper {
       flex: 1;
       display: flex;
@@ -116,136 +112,152 @@
       margin: 0 auto;
     }
     .login-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 26px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 24px;
       padding: 28px 22px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     }
     .login-logo {
-      width: 64px;
-      height: 64px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      margin: 0 auto 14px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      margin: 0 auto 14px;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+    }
+    .login-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .login-title {
       text-align: center;
-      font-size: 1.35rem;
+      font-size: 1.4rem;
       font-weight: 800;
+      color: #000000;
       margin-bottom: 4px;
     }
     .login-sub {
       text-align: center;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-sub);
       margin-bottom: 22px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
     .alert-box {
-      background: rgba(244, 63, 94, 0.14);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      color: #fda4af;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
       padding: 10px 12px;
       border-radius: 12px;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
+      font-weight: 600;
       margin-bottom: 14px;
       line-height: 1.4;
     }
     .form-group { margin-bottom: 14px; }
     .form-label {
       display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-sub);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #000000;
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
     .form-input {
       width: 100%;
       padding: 13px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(9, 13, 22, 0.8);
-      color: #fff;
+      border-radius: 13px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #000000;
       font-size: 0.95rem;
+      font-weight: 500;
       outline: none;
       user-select: text;
     }
     .form-input:focus {
-      border-color: var(--accent);
+      border-color: var(--blue);
+      background: #ffffff;
     }
     .btn-primary {
       width: 100%;
       padding: 14px;
-      border-radius: 15px;
+      border-radius: 14px;
       border: none;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      color: #fff;
+      background: #0284c7;
+      color: #ffffff;
       font-size: 0.95rem;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       margin-top: 6px;
-      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
     }
     .btn-primary:active { transform: scale(0.98); }
 
     .quick-accounts {
       margin-top: 18px;
       padding-top: 14px;
-      border-top: 1px solid var(--card-border);
+      border-top: 1px solid #e2e8f0;
       display: flex;
       gap: 8px;
     }
     .chip-btn {
       flex: 1;
-      padding: 8px 6px;
+      padding: 9px 6px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.04);
-      color: var(--text-sub);
-      font-size: 0.72rem;
-      font-weight: 600;
+      border: 1px solid #cbd5e1;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 0.74rem;
+      font-weight: 700;
       cursor: pointer;
     }
 
-    /* ─── HEADER & THANH TÀI KHOẢN ─── */
+    /* ─── MÀN HÌNH 2: HEADER CÓ LOGO TDTU GÓC TRÊN BÊN TRÁI VIỀN ĐEN MỎNG ─── */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 2px 12px;
+      padding: 4px 0 14px;
+      gap: 10px;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .brand-icon {
-      width: 38px;
+    .tdtu-logo-box {
+      width: 58px;
       height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #0284c7, #0369a1);
+      border: 1px solid #000000;
+      border-radius: 6px;
+      background: #ffffff;
+      padding: 2px 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .tdtu-logo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
     .brand-text h1 {
       font-size: 1.05rem;
       font-weight: 800;
+      color: #000000;
     }
     .brand-text p {
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       color: var(--text-sub);
+      font-weight: 600;
     }
 
     .status-badge {
@@ -255,17 +267,18 @@
       padding: 6px 11px;
       border-radius: 999px;
       font-size: 0.72rem;
-      font-weight: 700;
+      font-weight: 800;
+      flex-shrink: 0;
     }
     .status-badge.online {
-      background: rgba(16, 185, 129, 0.14);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: var(--green);
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
+      color: #047857;
     }
     .status-badge.offline {
-      background: rgba(244, 63, 94, 0.16);
-      border: 1px solid rgba(244, 63, 94, 0.4);
-      color: var(--red);
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
       animation: pulseAlert 1s infinite alternate;
     }
     .badge-dot {
@@ -273,65 +286,66 @@
       height: 7px;
       border-radius: 50%;
       background: currentColor;
-      box-shadow: 0 0 8px currentColor;
     }
 
     .session-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--card-border);
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
       border-radius: 14px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       margin-bottom: 12px;
-      font-size: 0.73rem;
+      font-size: 0.75rem;
     }
     .role-tag {
-      font-weight: 700;
-      color: var(--accent);
+      font-weight: 800;
+      color: #000000;
     }
     .session-timer {
       color: var(--text-sub);
       font-family: "SF Mono", Menlo, monospace;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
+      font-weight: 600;
     }
     .logout-btn {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.35);
-      color: #fda4af;
-      padding: 5px 10px;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
+      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 0.72rem;
-      font-weight: 700;
+      font-size: 0.74rem;
+      font-weight: 800;
       cursor: pointer;
     }
 
     /* ─── THANH KÍCH HOẠT WEB PUSH CHẠY NỀN ─── */
     .push-bar {
-      background: rgba(56, 189, 248, 0.09);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      border-radius: 16px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 14px;
       padding: 10px 12px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
     }
     .push-info {
-      font-size: 0.74rem;
-      color: #bae6fd;
-      line-height: 1.35;
+      font-size: 0.76rem;
+      color: #0f172a;
+      line-height: 1.4;
       flex: 1;
+      font-weight: 500;
     }
     .push-btn {
-      background: var(--accent);
-      color: #070a12;
+      background: #0284c7;
+      color: #ffffff;
       border: none;
       border-radius: 10px;
-      padding: 7px 10px;
-      font-size: 0.72rem;
+      padding: 8px 12px;
+      font-size: 0.74rem;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
@@ -339,135 +353,106 @@
 
     /* ─── CARD TRẠNG THÁI TRUNG TÂM ─── */
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
       border-radius: 24px;
-      padding: 20px 18px;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      margin-bottom: 12px;
+      padding: 24px 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      margin-bottom: 14px;
     }
     .status-card {
       text-align: center;
-      padding: 28px 18px 24px;
+      padding: 34px 18px 30px;
     }
     .status-sub-lbl {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       color: var(--text-sub);
-      font-weight: 600;
-      margin-bottom: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
     }
     .status-visual {
-      width: 92px;
-      height: 92px;
-      margin: 0 auto 14px;
+      width: 96px;
+      height: 96px;
+      margin: 0 auto 16px;
       border-radius: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
+      font-size: 3.2rem;
       transition: all 0.35s ease;
     }
     .status-card.state-idle .status-visual {
-      background: rgba(6, 182, 212, 0.12);
-      border: 1px solid rgba(6, 182, 212, 0.3);
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
     }
     .status-card.state-walk .status-visual {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
     }
     .status-card.state-fall .status-visual {
-      background: rgba(244, 63, 94, 0.2);
-      border: 1px solid rgba(244, 63, 94, 0.55);
+      background: #fef2f2;
+      border: 2px solid #ef4444;
       animation: pulseAlert 0.75s infinite alternate;
     }
     .status-card.state-offline .status-visual {
-      background: rgba(148, 163, 184, 0.12);
-      border: 1px dashed rgba(148, 163, 184, 0.35);
-      filter: grayscale(0.4);
+      background: #f1f5f9;
+      border: 1px dashed #94a3b8;
     }
 
     .main-status-text {
-      font-size: 1.45rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      margin-bottom: 6px;
+      color: #000000;
+      margin-bottom: 8px;
     }
-    .state-idle .main-status-text { color: var(--accent); }
-    .state-walk .main-status-text { color: var(--green); }
-    .state-fall .main-status-text { color: var(--red); }
-    .state-offline .main-status-text { color: #cbd5e1; font-size: 1.15rem; }
+    .state-idle .main-status-text { color: #000000; }
+    .state-walk .main-status-text { color: #047857; }
+    .state-fall .main-status-text { color: #dc2626; }
+    .state-offline .main-status-text { color: #000000; font-size: 1.2rem; }
 
     .update-time {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--text-sub);
+      font-weight: 600;
       line-height: 1.45;
     }
     .offline-note {
       display: none;
-      margin-top: 12px;
-      padding: 10px 12px;
+      margin-top: 14px;
+      padding: 12px;
       border-radius: 12px;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: #fde68a;
-      font-size: 0.74rem;
-      line-height: 1.4;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      color: #000000;
+      font-size: 0.76rem;
+      line-height: 1.45;
     }
     .state-offline .offline-note { display: block; }
 
     .reset-btn {
       display: none;
       width: 100%;
-      margin-top: 16px;
+      margin-top: 18px;
       padding: 14px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, #f43f5e, #be123c);
-      color: #fff;
+      border-radius: 14px;
+      background: #dc2626;
+      color: #ffffff;
       font-size: 0.92rem;
       font-weight: 800;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 18px rgba(244, 63, 94, 0.35);
     }
     .state-fall .reset-btn { display: block; }
 
-    /* ─── 3 Ô ĐO TELEMETRY ─── */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .metric-box {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 14px 8px;
-      text-align: center;
-    }
-    .metric-val {
-      font-size: 1.18rem;
-      font-weight: 800;
-      font-family: "SF Mono", Menlo, monospace;
-      color: #fff;
-      margin-bottom: 4px;
-    }
-    .metric-lbl {
-      font-size: 0.65rem;
-      color: var(--text-sub);
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-
     /* ─── PANEL QUẢN TRỊ ADMIN ─── */
     .section-title {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--accent);
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #000000;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       margin-bottom: 12px;
     }
     .admin-row {
@@ -476,35 +461,28 @@
       gap: 10px;
       margin-bottom: 10px;
     }
-
-    .footer {
-      margin-top: auto;
-      text-align: center;
-      padding-top: 10px;
-      font-size: 0.68rem;
-      color: #475569;
-      line-height: 1.45;
-    }
   </style>
 </head>
 <body>
 
-  <!-- BANNER NỔI TRONG APP KHI CÓ TÉ NGÃ -->
+  <!-- BANNER NỔI KHI CÓ TÉ NGÃ -->
   <div class="ios-notification" id="iosAlert">
     <div class="notif-icon">🚨</div>
     <div class="notif-body">
       <div class="notif-title">
         <span>CẢNH BÁO TÉ NGÃ KHẨN CẤP!</span>
-        <span style="font-size:0.7rem;color:#fda4af;">Ngay bây giờ</span>
+        <span style="font-size:0.7rem;color:#475569;">Ngay bây giờ</span>
       </div>
       <div class="notif-desc">Phát hiện người thân đeo đai bị té ngã và đang nằm bất động!</div>
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH 1: ĐĂNG NHẬP (AUTH & 24H SESSION) ================= -->
+  <!-- ================= MÀN HÌNH 1: ĐĂNG NHẬP ================= -->
   <div class="login-wrapper" id="loginScreen">
     <div class="login-card">
-      <div class="login-logo">🛡️</div>
+      <div class="login-logo">
+        <img src="/apple-touch-icon.png" alt="SafeGuard Icon">
+      </div>
       <div class="login-title">SafeGuard IoT</div>
       <div class="login-sub">Hệ Thống Giám Sát Vận Động & Cảnh Báo Té Ngã<br>(Duy trì phiên 24 giờ • Báo động ngầm 24/7)</div>
 
@@ -529,11 +507,13 @@
     </div>
   </div>
 
-  <!-- ================= MÀN HÌNH 2: GIÁM SÁT CHÍNH (DASHBOARD) ================= -->
+  <!-- ================= MÀN HÌNH 2: GIÁM SÁT CHÍNH ================= -->
   <div id="dashboardScreen" class="hidden">
     <header class="header">
       <div class="brand">
-        <div class="brand-icon">🛡️</div>
+        <div class="tdtu-logo-box">
+          <img src="/logo_tdtu.jpg" alt="TDTU Logo">
+        </div>
         <div class="brand-text">
           <h1>SafeGuard</h1>
           <p>Giám Sát Vận Động Đai Lưng</p>
@@ -554,19 +534,18 @@
       <button class="logout-btn" onclick="handleExplicitLogout()">Đăng xuất</button>
     </div>
 
-    <!-- THANH ĐĂNG KÝ NHẬN THÔNG BÁO ĐẨY CHẠY NỀN (iOS 18.6 WEB PUSH) -->
+    <!-- THANH ĐĂNG KÝ NHẬN THÔNG BÁO ĐẨY CHẠY NỀN -->
     <div class="push-bar" id="pushBar">
       <div class="push-info" id="pushStatusText">
         🔔 Bật thông báo đẩy để nhận cảnh báo té ngã ngay cả khi thoát app chơi game / lướt Facebook.
       </div>
       <button class="push-btn" id="btnEnablePush" onclick="enableBackgroundPush()">Bật Thông Báo</button>
-      <button class="push-btn hidden" id="btnTestPush" onclick="testBackgroundPush()">Test Ngầm 5s</button>
     </div>
 
     <main>
       <section class="card status-card state-offline" id="mainStatusCard">
         <div class="status-sub-lbl">Trạng thái người đeo đai</div>
-        <div class="status-visual" id="stateVisual">📡</div>
+        <div class="status-visual" id="stateVisual">⚠️</div>
         <div class="main-status-text" id="stateText">Người đeo đai đang ở vùng không có Internet</div>
         <div class="update-time" id="lastSeen">Mất kết nối • Chưa có dữ liệu</div>
 
@@ -579,25 +558,9 @@
         </button>
       </section>
 
-      <!-- 3 Ô ĐO TELEMETRY -->
-      <section class="metrics-grid">
-        <div class="metric-box">
-          <div class="metric-val" id="valAcc">9.80</div>
-          <div class="metric-lbl">Gia tốc (m/s²)</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-val" id="valStd">0.00</div>
-          <div class="metric-lbl">Độ lệch σ</div>
-        </div>
-        <div class="metric-box">
-          <div class="metric-val" id="valAI">0%</div>
-          <div class="metric-lbl">AI TinyML</div>
-        </div>
-      </section>
-
-      <!-- BẢNG QUẢN TRỊ DÀNH RIÊNG CHO ADMIN (RBAC) -->
+      <!-- BẢNG QUẢN TRỊ DÀNH RIÊNG CHO ADMIN -->
       <section class="card hidden" id="adminPanel">
-        <div class="section-title">⚙️ Cấu Hình Quản Trị Viên (Admin RBAC)</div>
+        <div class="section-title">⚙️ Cấu Hình Quản Trị Viên (Admin)</div>
         <div class="admin-row">
           <div>
             <label class="form-label">SĐT nhận SMS (SIM A7680C)</label>
@@ -612,11 +575,6 @@
       </section>
     </main>
   </div>
-
-  <footer class="footer">
-    Đồ Án Chuyên Ngành Điện Tử Viễn Thông • ĐH Tôn Đức Thắng<br>
-    SafeGuard PWA v2.0 (Tương thích iOS 18.6 Standalone)
-  </footer>
 
   <script>
     const SESSION_STORAGE_KEY = 'safeguard_auth_session';
@@ -653,9 +611,7 @@
         const session = JSON.parse(raw);
         if (!session.token || !session.expiresAt) return null;
 
-        // Kiểm tra hạn 24 giờ (ví dụ đăng nhập 00:00 ngày 01/01 -> hết hạn 00:00 ngày 02/01)
         if (Date.now() >= session.expiresAt) {
-          // Chỉ xóa phiên đăng nhập, KHÔNG hủy PushSubscription để vẫn nhận thông báo té ngã sau 24h
           localStorage.removeItem(SESSION_STORAGE_KEY);
           showLoginAlert('Phiên đăng nhập 24 giờ đã hết hạn. Vui lòng đăng nhập lại để xem dữ liệu.');
           return null;
@@ -691,8 +647,6 @@
       }
     }
 
-    // Khi người dùng chủ động bấm "Đăng xuất" (trường hợp mượn máy người khác):
-    // Xóa cả phiên 24h VÀ hủy đăng ký thông báo đẩy trên thiết bị này
     async function handleExplicitLogout() {
       try {
         if (swRegistration && swRegistration.pushManager) {
@@ -755,9 +709,8 @@
 
     function setPushActivatedUI() {
       document.getElementById('pushStatusText').innerHTML =
-        '✅ <b>Đã bật Báo động chạy nền 24/7:</b> Luôn nhận thông báo té ngã kể cả khi thoát app chơi game/lướt FB hoặc quá 24h.';
+        '✅ <b>Đã bật Báo động chạy nền 24/7:</b> Luôn nhận thông báo nổi khi có té ngã kể cả khi thoát app hoặc quá 24h.';
       document.getElementById('btnEnablePush').classList.add('hidden');
-      document.getElementById('btnTestPush').classList.remove('hidden');
     }
 
     async function syncSubscriptionToServer(sub) {
@@ -798,24 +751,8 @@
         await syncSubscriptionToServer(sub);
         setPushActivatedUI();
       } catch (err) {
-        alert('Lưu ý: Trên iPhone (iOS 18.6), cần truy cập qua link HTTPS và mở từ icon ngoài Màn hình chính để bật Web Push.');
+        alert('Vui lòng mở ứng dụng từ icon ngoài Màn hình chính để bật thông báo.');
       }
-    }
-
-    async function testBackgroundPush() {
-      const session = getValidSession();
-      if (!session) return;
-      const btn = document.getElementById('btnTestPush');
-      btn.textContent = 'Đang đếm 5s...';
-      await fetch('/api/push/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + session.token
-        },
-        body: JSON.stringify({ delayMs: 5000 })
-      });
-      setTimeout(() => { btn.textContent = 'Test Ngầm 5s'; }, 5500);
     }
 
     function enterDashboard(session) {
@@ -835,7 +772,7 @@
       stopTimers();
       countdownTimer = setInterval(updateSessionCountdown, 1000);
       pollStatus();
-      pollTimer = setInterval(pollStatus, 600);
+      pollTimer = setInterval(pollStatus, 800);
     }
 
     async function pollStatus() {
@@ -860,10 +797,6 @@
         const txt = document.getElementById('stateText');
         const seen = document.getElementById('lastSeen');
         const notif = document.getElementById('iosAlert');
-
-        document.getElementById('valAcc').textContent = Number(d.acc || 9.8).toFixed(2);
-        document.getElementById('valStd').textContent = Number(d.std || 0).toFixed(2);
-        document.getElementById('valAI').textContent = Math.round((d.ai || 0) * 100) + '%';
 
         if (d.config && document.activeElement !== document.getElementById('cfgPhone') && document.activeElement !== document.getElementById('cfgAi')) {
           document.getElementById('cfgPhone').value = d.config.emergencyPhone;
@@ -934,7 +867,6 @@
       }
     }
 
-    // Kiểm tra lại thời hạn 24h mỗi khi người dùng mở lại app từ đa nhiệm hoặc bấm vào từ thông báo nổi
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         const session = getValidSession();

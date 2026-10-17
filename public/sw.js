@@ -1,9 +1,10 @@
-const CACHE_NAME = 'safeguard-shell-v2';
+const CACHE_NAME = 'safeguard-shell-v3';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/icon.svg'
+  '/apple-touch-icon.png',
+  '/logo_tdtu.jpg'
 ];
 
 self.addEventListener('install', event => {
@@ -38,7 +39,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Nhận gói tin Web Push từ Apple APNs ngay cả khi đã thoát App hoặc đã quá hạn 24 giờ
 self.addEventListener('push', event => {
   let data = {
     title: '🚨 CẢNH BÁO TÉ NGÃ KHẨN CẤP!',
@@ -57,8 +57,8 @@ self.addEventListener('push', event => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/icon.svg',
-      badge: '/icon.svg',
+      icon: '/apple-touch-icon.png',
+      badge: '/apple-touch-icon.png',
       tag: data.tag || 'safeguard-fall-alert',
       renotify: true,
       requireInteraction: true,
@@ -67,7 +67,6 @@ self.addEventListener('push', event => {
   );
 });
 
-// Khi chạm vào thông báo nổi trên iPhone, mở thẳng cửa sổ Standalone của SafeGuard
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
