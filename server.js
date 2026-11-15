@@ -8,7 +8,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 giờ
-const OFFLINE_TIMEOUT_MS = 20000;
+const OFFLINE_TIMEOUT_MS = 6000;
 
 app.use(cors());
 app.use(express.json());
@@ -124,7 +124,9 @@ async function broadcastPushNotification(payloadObj) {
         urgency: 'high'
       });
       validSubs.push(sub);
+      console.log('[WebPush SUCCESS] Đã gửi thông báo tới endpoint:', sub.endpoint.slice(0, 45));
     } catch (err) {
+      console.error('[WebPush ERROR] Mã lỗi:', err.statusCode, '| Chi tiết:', err.message);
       // 404 hoặc 410 nghĩa là iPhone đã xóa app hoặc hủy đăng ký trên APNs
       if (err.statusCode !== 404 && err.statusCode !== 410) {
         validSubs.push(sub);
@@ -220,8 +222,8 @@ app.post('/api/push/test', requireAuth, (req, res) => {
   const delayMs = Number(req.body?.delayMs) || 5000;
   setTimeout(() => {
     broadcastPushNotification({
-      title: '🚨 KHẨN CẤP: PHÁT HIỆN TÉ NGÃ!',
-      body: 'Người thân đeo đai vừa bị ngã và đang nằm bất động! Chạm để mở SafeGuard.',
+      title: '🚨 CẢNH BÁO TÉ NGÃ KHẨN CẤP!',
+      body: 'Phát hiện người thân bị té ngã! Hãy bấm vào để kiểm tra ngay.',
       tag: 'safeguard-fall-alert',
       timestamp: Date.now()
     });
@@ -248,7 +250,7 @@ app.post('/api/esp32/telemetry', (req, res) => {
     addHistoryEvent('FALL', `Phát hiện TÉ NGÃ (Gia tốc: ${beltState.acc.toFixed(1)} m/s², AI: ${Math.round(beltState.ai * 100)}%)`);
     broadcastPushNotification({
       title: '🚨 CẢNH BÁO TÉ NGÃ KHẨN CẤP!',
-      body: `Người thân đeo đai bị TÉ NGÃ! (Gia tốc: ${beltState.acc.toFixed(1)} m/s², AI: ${Math.round(beltState.ai * 100)}%). Chạm để kiểm tra ngay!`,
+      body: 'Phát hiện người thân bị té ngã! Hãy bấm vào để kiểm tra ngay.',
       tag: 'safeguard-fall-alert',
       timestamp: Date.now()
     });
