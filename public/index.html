@@ -552,10 +552,9 @@
     <!-- THANH ĐĂNG KÝ NHẬN THÔNG BÁO ĐẨY CHẠY NỀN -->
     <div class="push-bar" id="pushBar">
       <div class="push-info" id="pushStatusText">
-        🔔 Cho phép nhận thông báo nổi khi phát hiện té ngã.
+        🔔 Thông báo nổi khi phát hiện té ngã
       </div>
-      <button class="push-btn" id="btnEnablePush" onclick="enableBackgroundPush()">Bật Thông Báo</button>
-      <button class="push-btn hidden" id="btnTestPush" style="background:#059669;" onclick="testBackgroundPush()">Thử Thông Báo</button>
+      <button class="push-btn" id="btnEnablePush" onclick="enableBackgroundPush()">Nhận thông báo nổi</button>
     </div>
 
     <main>
@@ -689,9 +688,8 @@
 
     function resetPushUI() {
       document.getElementById('pushStatusText').textContent =
-        '🔔 Cho phép nhận thông báo nổi khi phát hiện té ngã.';
+        '🔔 Thông báo nổi khi phát hiện té ngã';
       document.getElementById('btnEnablePush').classList.remove('hidden');
-      document.getElementById('btnTestPush').classList.add('hidden');
     }
 
     function stopTimers() {
@@ -714,95 +712,73 @@
       document.getElementById('sessionCountdown').textContent = `• Hạn 24h: còn ${hrs}:${mins}:${secs}`;
     }
 
+    let swReloaded = false;
+    function initServiceWorkerUpdateListener() {
+      if (!('serviceWorker' in navigator)) return;
+      const hadController = Boolean(navigator.serviceWorker.controller);
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !swReloaded) {
+          swReloaded = true;
+          window.location.reload();
+        }
+      });
+    }
+
+    async function ensureServiceWorker() {
+      if (!('serviceWorker' in navigator)) return null;
+      const reg = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+      reg.update().catch(() => {});
+      swRegistration = await navigator.serviceWorker.ready;
+      return swRegistration;
+    }
+
     async function checkExistingPushSubscription() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         document.getElementById('pushStatusText').textContent =
           '📲 Thêm ứng dụng vào Màn hình chính (Chia sẻ ↑ → Thêm vào MH chính) để bật thông báo nổi.';
         document.getElementById('btnEnablePush').classList.add('hidden');
-        document.getElementById('btnTestPush').classList.add('hidden');
         return;
       }
       try {
-        await navigator.serviceWorker.register('/sw.js');
-        swRegistration = await navigator.serviceWorker.ready;
-        let sub = await swRegistration.pushManager.getSubscription();
-        if (Notification.permission === 'granted') {
-          if (!sub) {
-            const keyRes = await fetch('/api/push/vapid-public-key');
-            const { publicKey } = await keyRes.json();
-            sub = await swRegistration.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: urlBase64ToUint8Array(publicKey)
-            });
-          }
-          await syncSubscriptionToServer(sub);
-          setPushActivatedUI();
+        await ensureServiceWorker();
+        const sub = await swRegistration.pushManager.getSubscription();
+        if (sub && Notification.permission === 'granted') {
+          const synced = await syncSubscriptionToServer(sub);
+          if (synced) setPushActivatedUI();
         }
       } catch (e) {}
     }
 
     function setPushActivatedUI() {
       document.getElementById('pushStatusText').innerHTML =
-        '✅ <b>Đã bật thông báo nổi mặc định</b>';
+        '✅ <b>Đã bật thông báo nổi</b>';
       document.getElementById('btnEnablePush').classList.add('hidden');
-      document.getElementById('btnTestPush').classList.remove('hidden');
     }
 
-    let testPushTimer = null;
-    async function testBackgroundPush() {
+    async function syncSubscriptionToServer(sub) {
       const session = getValidSession();
-      if (!session) return;
-      const btn = document.getElementById('btnTestPush');
-      if (btn.disabled) return;
-      btn.disabled = true;
-
-      let sec = 5;
-      btn.textContent = `Gửi sau ${sec}s...`;
-      if (testPushTimer) clearInterval(testPushTimer);
-      testPushTimer = setInterval(() => {
-        sec--;
-        if (sec > 0) {
-          btn.textContent = `Gửi sau ${sec}s...`;
-        } else {
-          clearInterval(testPushTimer);
-          btn.textContent = 'Đã gửi';
-          setTimeout(() => {
-            btn.textContent = 'Thử Thông Báo';
-            btn.disabled = false;
-          }, 2000);
-        }
-      }, 1000);
-
+      if (!session) return false;
       try {
-        await fetch('/api/push/test', {
+        const res = await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + session.token
           },
-          body: JSON.stringify({ delayMs: 5000 })
+          body: JSON.stringify({ subscription: sub })
         });
+        return res.ok;
       } catch (e) {
-        clearInterval(testPushTimer);
-        btn.textContent = 'Thử Thông Báo';
-        btn.disabled = false;
+        return false;
       }
     }
 
-    async function syncSubscriptionToServer(sub) {
-      const session = getValidSession();
-      if (!session) return;
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + session.token
-        },
-        body: JSON.stringify({ subscription: sub })
-      });
-    }
-
     async function enableBackgroundPush() {
+      const btn = document.getElementById('btnEnablePush');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Đang bật...';
+      }
       try {
         if (!('Notification' in window) || !('PushManager' in window)) {
           alert('Vui lòng thêm ứng dụng vào Màn hình chính (Chia sẻ ↑ → Thêm vào Màn hình chính) rồi mở từ icon để bật thông báo.');
@@ -813,8 +789,11 @@
           alert('Bạn cần chọn "Cho phép" (Allow) trong hộp thoại của iPhone để nhận thông báo nổi.');
           return;
         }
-        swRegistration = await navigator.serviceWorker.ready;
+        await ensureServiceWorker();
         const keyRes = await fetch('/api/push/vapid-public-key');
+        if (!keyRes.ok) {
+          throw new Error('Không lấy được khóa thông báo từ máy chủ.');
+        }
         const { publicKey } = await keyRes.json();
 
         // Làm mới subscription để tránh đụng độ token cũ hoặc lệch VAPID key
@@ -829,11 +808,20 @@
           applicationServerKey: urlBase64ToUint8Array(publicKey)
         });
 
-        await syncSubscriptionToServer(sub);
+        const synced = await syncSubscriptionToServer(sub);
+        if (!synced) {
+          throw new Error('Không thể lưu đăng ký thông báo lên máy chủ.');
+        }
         setPushActivatedUI();
       } catch (err) {
         console.error('Lỗi đăng ký Web Push:', err);
         alert('Lỗi kích hoạt thông báo: ' + (err.message || 'Vui lòng mở ứng dụng từ icon Màn hình chính để bật.'));
+      } finally {
+        const btn = document.getElementById('btnEnablePush');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Nhận thông báo nổi';
+        }
       }
     }
 
@@ -951,6 +939,9 @@
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
+        if (swRegistration) {
+          swRegistration.update().catch(() => {});
+        }
         const session = getValidSession();
         if (session) {
           pollStatus();
@@ -963,9 +954,8 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      }
+      initServiceWorkerUpdateListener();
+      ensureServiceWorker().catch(() => {});
       const session = getValidSession();
       if (session) {
         enterDashboard(session);
