@@ -12,7 +12,16 @@ const OFFLINE_TIMEOUT_MS = 6000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders(res, filePath) {
+    const base = path.basename(filePath);
+    if (base === 'sw.js' || base === 'index.html') {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 const STORE_FILE = path.join(__dirname, 'store.json');
 
@@ -199,11 +208,13 @@ app.post('/api/push/subscribe', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Thiếu thông tin PushSubscription' });
   }
 
-  const exists = store.subscriptions.some(s => s.endpoint === subscription.endpoint);
-  if (!exists) {
+  const idx = store.subscriptions.findIndex(s => s.endpoint === subscription.endpoint);
+  if (idx >= 0) {
+    store.subscriptions[idx] = subscription;
+  } else {
     store.subscriptions.push(subscription);
-    saveStore();
   }
+  saveStore();
   res.json({ ok: true, count: store.subscriptions.length });
 });
 
