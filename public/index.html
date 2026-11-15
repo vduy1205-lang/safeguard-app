@@ -552,9 +552,10 @@
     <!-- THANH ĐĂNG KÝ NHẬN THÔNG BÁO ĐẨY CHẠY NỀN -->
     <div class="push-bar" id="pushBar">
       <div class="push-info" id="pushStatusText">
-        🔔 Bật thông báo đẩy để nhận cảnh báo té ngã ngay cả khi thoát app chơi game / lướt Facebook.
+        🔔 Cho phép nhận thông báo nổi khi phát hiện té ngã.
       </div>
       <button class="push-btn" id="btnEnablePush" onclick="enableBackgroundPush()">Bật Thông Báo</button>
+      <button class="push-btn hidden" id="btnTestPush" style="background:#059669;" onclick="testBackgroundPush()">Thử Thông Báo</button>
     </div>
 
     <main>
@@ -679,10 +680,18 @@
 
       localStorage.removeItem(SESSION_STORAGE_KEY);
       stopTimers();
+      resetPushUI();
       document.getElementById('iosAlert').classList.remove('active');
       document.getElementById('dashboardScreen').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       showLoginAlert('Đã đăng xuất và tắt nhận thông báo khẩn cấp trên thiết bị này.');
+    }
+
+    function resetPushUI() {
+      document.getElementById('pushStatusText').textContent =
+        '🔔 Cho phép nhận thông báo nổi khi phát hiện té ngã.';
+      document.getElementById('btnEnablePush').classList.remove('hidden');
+      document.getElementById('btnTestPush').classList.add('hidden');
     }
 
     function stopTimers() {
@@ -708,14 +717,24 @@
     async function checkExistingPushSubscription() {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         document.getElementById('pushStatusText').textContent =
-          '📲 Để nhận thông báo ngầm trên iOS 18.6: Bấm Chia sẻ (↑) ở Safari → Thêm vào MH chính rồi mở từ icon.';
+          '📲 Thêm ứng dụng vào Màn hình chính (Chia sẻ ↑ → Thêm vào MH chính) để bật thông báo nổi.';
         document.getElementById('btnEnablePush').classList.add('hidden');
+        document.getElementById('btnTestPush').classList.add('hidden');
         return;
       }
       try {
-        swRegistration = await navigator.serviceWorker.register('/sw.js');
-        const sub = await swRegistration.pushManager.getSubscription();
-        if (sub && Notification.permission === 'granted') {
+        await navigator.serviceWorker.register('/sw.js');
+        swRegistration = await navigator.serviceWorker.ready;
+        let sub = await swRegistration.pushManager.getSubscription();
+        if (Notification.permission === 'granted') {
+          if (!sub) {
+            const keyRes = await fetch('/api/push/vapid-public-key');
+            const { publicKey } = await keyRes.json();
+            sub = await swRegistration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(publicKey)
+            });
+          }
           await syncSubscriptionToServer(sub);
           setPushActivatedUI();
         }
@@ -724,15 +743,36 @@
 
     function setPushActivatedUI() {
       document.getElementById('pushStatusText').innerHTML =
-        '✅ <b>Đã bật Báo động chạy nền:</b> Luôn nhận thông báo nổi khi có té ngã kể cả khi thoát app lướt Facebook/tắt màn hình.<br>' +
-        '<button class="push-btn" style="background:#059669;margin-top:6px;padding:6px 14px;font-size:0.75rem;font-weight:600;" onclick="testBackgroundPush()">🔔 Thử Nhận Thông Báo Nổi (sau 5s)</button>';
+        '✅ <b>Đã bật thông báo nổi mặc định</b>';
       document.getElementById('btnEnablePush').classList.add('hidden');
+      document.getElementById('btnTestPush').classList.remove('hidden');
     }
 
+    let testPushTimer = null;
     async function testBackgroundPush() {
       const session = getValidSession();
       if (!session) return;
-      alert('Đã hẹn giờ! Trong 5 giây nữa hệ thống sẽ bắn thông báo nổi.\n👉 Hãy VUỐT THOÁT RA MÀN HÌNH CHÍNH hoặc MỞ FACEBOOK ngay bây giờ để kiểm tra!');
+      const btn = document.getElementById('btnTestPush');
+      if (btn.disabled) return;
+      btn.disabled = true;
+
+      let sec = 5;
+      btn.textContent = `Gửi sau ${sec}s...`;
+      if (testPushTimer) clearInterval(testPushTimer);
+      testPushTimer = setInterval(() => {
+        sec--;
+        if (sec > 0) {
+          btn.textContent = `Gửi sau ${sec}s...`;
+        } else {
+          clearInterval(testPushTimer);
+          btn.textContent = 'Đã gửi';
+          setTimeout(() => {
+            btn.textContent = 'Thử Thông Báo';
+            btn.disabled = false;
+          }, 2000);
+        }
+      }, 1000);
+
       try {
         await fetch('/api/push/test', {
           method: 'POST',
@@ -743,7 +783,9 @@
           body: JSON.stringify({ delayMs: 5000 })
         });
       } catch (e) {
-        alert('Lỗi kết nối máy chủ khi gửi thông báo thử nghiệm.');
+        clearInterval(testPushTimer);
+        btn.textContent = 'Thử Thông Báo';
+        btn.disabled = false;
       }
     }
 
@@ -763,12 +805,12 @@
     async function enableBackgroundPush() {
       try {
         if (!('Notification' in window) || !('PushManager' in window)) {
-          alert('Để nhận thông báo nổi khi thoát app trên iPhone: Bấm nút Chia sẻ (↑) ở Safari → Chọn "Thêm vào Màn hình chính" (Add to Home Screen) rồi mở app từ icon màn hình chính!');
+          alert('Vui lòng thêm ứng dụng vào Màn hình chính (Chia sẻ ↑ → Thêm vào Màn hình chính) rồi mở từ icon để bật thông báo.');
           return;
         }
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          alert('Bạn cần chọn "Cho phép" (Allow) trong hộp thoại thông báo của iPhone để nhận cảnh báo khi thoát app!');
+          alert('Bạn cần chọn "Cho phép" (Allow) trong hộp thoại của iPhone để nhận thông báo nổi.');
           return;
         }
         swRegistration = await navigator.serviceWorker.ready;
@@ -789,7 +831,6 @@
 
         await syncSubscriptionToServer(sub);
         setPushActivatedUI();
-        alert('✅ Đã kích hoạt thông báo chạy nền thành công!\nBạn có thể bấm nút "Thử Nhận Thông Báo Nổi (sau 5s)" rồi thoát ra lướt Facebook để kiểm tra.');
       } catch (err) {
         console.error('Lỗi đăng ký Web Push:', err);
         alert('Lỗi kích hoạt thông báo: ' + (err.message || 'Vui lòng mở ứng dụng từ icon Màn hình chính để bật.'));
