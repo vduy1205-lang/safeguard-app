@@ -171,7 +171,8 @@
     }
     .form-input {
       width: 100%;
-      padding: 13px 14px;
+      height: 46px;
+      padding: 11px 14px;
       border-radius: 13px;
       border: 1px solid #cbd5e1;
       background: #f8fafc;
@@ -180,6 +181,8 @@
       font-weight: 500;
       outline: none;
       user-select: text;
+      -webkit-appearance: none;
+      appearance: none;
     }
     .form-input:focus {
       border-color: var(--blue);
@@ -460,6 +463,18 @@
       grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-bottom: 10px;
+      align-items: stretch;
+    }
+    .admin-row > div {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .admin-row .form-label {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      line-height: 1.3;
     }
   </style>
 </head>
@@ -709,8 +724,27 @@
 
     function setPushActivatedUI() {
       document.getElementById('pushStatusText').innerHTML =
-        '✅ <b>Đã bật Báo động chạy nền 24/7:</b> Luôn nhận thông báo nổi khi có té ngã kể cả khi thoát app hoặc quá 24h.';
+        '✅ <b>Đã bật Báo động chạy nền:</b> Luôn nhận thông báo nổi khi có té ngã kể cả khi thoát app lướt Facebook/tắt màn hình.<br>' +
+        '<button class="push-btn" style="background:#059669;margin-top:6px;padding:6px 14px;font-size:0.75rem;font-weight:600;" onclick="testBackgroundPush()">🔔 Thử Nhận Thông Báo Nổi (sau 5s)</button>';
       document.getElementById('btnEnablePush').classList.add('hidden');
+    }
+
+    async function testBackgroundPush() {
+      const session = getValidSession();
+      if (!session) return;
+      alert('Đã hẹn giờ! Trong 5 giây nữa hệ thống sẽ bắn thông báo nổi.\n👉 Hãy VUỐT THOÁT RA MÀN HÌNH CHÍNH hoặc MỞ FACEBOOK ngay bây giờ để kiểm tra!');
+      try {
+        await fetch('/api/push/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.token
+          },
+          body: JSON.stringify({ delayMs: 5000 })
+        });
+      } catch (e) {
+        alert('Lỗi kết nối máy chủ khi gửi thông báo thử nghiệm.');
+      }
     }
 
     async function syncSubscriptionToServer(sub) {
@@ -729,29 +763,36 @@
     async function enableBackgroundPush() {
       try {
         if (!('Notification' in window) || !('PushManager' in window)) {
-          alert('Vui lòng thêm ứng dụng vào Màn hình chính (Add to Home Screen) trên iOS 18.6 để bật thông báo chạy nền!');
+          alert('Để nhận thông báo nổi khi thoát app trên iPhone: Bấm nút Chia sẻ (↑) ở Safari → Chọn "Thêm vào Màn hình chính" (Add to Home Screen) rồi mở app từ icon màn hình chính!');
           return;
         }
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          alert('Bạn cần chọn "Cho phép" (Allow) để nhận thông báo khi có té ngã!');
+          alert('Bạn cần chọn "Cho phép" (Allow) trong hộp thoại thông báo của iPhone để nhận cảnh báo khi thoát app!');
           return;
         }
         swRegistration = await navigator.serviceWorker.ready;
         const keyRes = await fetch('/api/push/vapid-public-key');
         const { publicKey } = await keyRes.json();
 
+        // Làm mới subscription để tránh đụng độ token cũ hoặc lệch VAPID key
         let sub = await swRegistration.pushManager.getSubscription();
-        if (!sub) {
-          sub = await swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(publicKey)
-          });
+        if (sub) {
+          try {
+            await sub.unsubscribe();
+          } catch (e) {}
         }
+        sub = await swRegistration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
+
         await syncSubscriptionToServer(sub);
         setPushActivatedUI();
+        alert('✅ Đã kích hoạt thông báo chạy nền thành công!\nBạn có thể bấm nút "Thử Nhận Thông Báo Nổi (sau 5s)" rồi thoát ra lướt Facebook để kiểm tra.');
       } catch (err) {
-        alert('Vui lòng mở ứng dụng từ icon ngoài Màn hình chính để bật thông báo.');
+        console.error('Lỗi đăng ký Web Push:', err);
+        alert('Lỗi kích hoạt thông báo: ' + (err.message || 'Vui lòng mở ứng dụng từ icon Màn hình chính để bật.'));
       }
     }
 

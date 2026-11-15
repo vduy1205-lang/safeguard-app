@@ -1,4 +1,4 @@
-const CACHE_NAME = 'safeguard-shell-v3';
+const CACHE_NAME = 'safeguard-shell-v4';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -42,7 +42,7 @@ self.addEventListener('fetch', event => {
 self.addEventListener('push', event => {
   let data = {
     title: '🚨 CẢNH BÁO TÉ NGÃ KHẨN CẤP!',
-    body: 'Phát hiện người thân đeo đai bị TÉ NGÃ! Chạm để mở ứng dụng SafeGuard.',
+    body: 'Phát hiện người thân bị té ngã! Hãy bấm vào để kiểm tra ngay.',
     tag: 'safeguard-fall-alert'
   };
 
