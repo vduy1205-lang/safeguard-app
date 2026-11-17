@@ -1,4 +1,4 @@
-const CACHE_NAME = 'safeguard-shell-v6';
+const CACHE_NAME = 'safeguard-shell-v7';
 const SHELL_ASSETS = [
   '/manifest.json',
   '/apple-touch-icon.png',

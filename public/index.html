@@ -516,8 +516,7 @@
       </form>
 
       <div class="quick-accounts">
-        <button type="button" class="chip-btn" onclick="fillAccount('nguoithan','123456')">👤 Điền: Người thân</button>
-        <button type="button" class="chip-btn" onclick="fillAccount('admin','admin123')">⚙️ Điền: Quản trị Admin</button>
+        <button type="button" class="chip-btn" onclick="fillAccount('nguoithan','123456')">👤 Điền: Người quan sát</button>
       </div>
     </div>
   </div>
@@ -543,7 +542,7 @@
     <!-- THANH PHIÊN 24 GIỜ & NÚT ĐĂNG XUẤT -->
     <div class="session-bar">
       <div>
-        <span class="role-tag" id="userRoleLabel">Người thân</span>
+        <span class="role-tag" id="userRoleLabel">Người quan sát</span>
         <span class="session-timer" id="sessionCountdown">• Còn 24:00:00</span>
       </div>
       <button class="logout-btn" onclick="handleExplicitLogout()">Đăng xuất</button>
@@ -829,7 +828,7 @@
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('dashboardScreen').classList.remove('hidden');
       document.getElementById('userRoleLabel').textContent =
-        session.user.role === 'admin' ? '👑 Quản trị viên (Admin)' : '👤 Người thân (Caregiver)';
+        session.user.role === 'admin' ? '👑 Quản trị viên (Admin)' : '👤 Người quan sát';
 
       if (session.user.role === 'admin') {
         document.getElementById('adminPanel').classList.remove('hidden');
